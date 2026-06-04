@@ -1,35 +1,59 @@
-module synchronous_fifo #(parameter DEPTH=8, DATA_WIDTH=8) (
-  input clk, rst_n,
-  input w_en, r_en,
-  input [DATA_WIDTH-1:0] data_in,
-  output reg [DATA_WIDTH-1:0] data_out,
-  output full, empty
-);
+// Code your design here
+module fifo_sync
   
-  reg [$clog2(DEPTH)-1:0] w_ptr, r_ptr;
-  reg [DATA_WIDTH-1:0] fifo[DEPTH];
+  //paramters defined
+  #( parameter FIFO_DEPTH = 8,
+     parameter DATA_WIDTH = 32)
   
-  // Set Default values on reset.
-  always@(posedge clk) begin
-    if(!rst_n) begin
-      w_ptr <= 0; r_ptr <= 0;
-      data_out <= 0;
-    end
-  end
+  //signals
   
-  // To write data to FIFO
-  always@(posedge clk) begin
-    if(w_en & !full)begin
-      fifo[w_ptr] <= data_in;
-      w_ptr <= w_ptr + 1;
-    end
-  end
+  (input clk,
+   input rst_n,
+   input cs,
+   input wr_en,
+   input rd_en,
+   input [DATA_WIDTH-1:0] data_in,
+   output reg [DATA_WIDTH-1:0] data_out,
+   output empty,
+   output full);
   
-  // To read data from FIFO
-  always@(posedge clk) begin
-    if(r_en & !empty) begin
-      data_out <= fifo[r_ptr];
-      r_ptr <= r_ptr + 1;
-    end
-  end
+  localparam FIFO_DEPTH_LOG = $clog2(FIFO_DEPTH); //
   
+  reg [DATA_WIDTH-1:0] fifo [0:FIFO_DEPTH -1];
+  
+  reg [FIFO_DEPTH_LOG :0]wr_ptr;
+  reg [FIFO_DEPTH_LOG :0]rd_ptr;
+  
+  //write
+  
+  always @(posedge clk or negedge rst_n)
+    begin
+      if(!rst_n)
+        wr_ptr <= 0;
+      else if (cs && wr_en && !full) begin
+        fifo[wr_ptr[FIFO_DEPTH_LOG -1:0]] <= data_in;
+             wr_ptr <= wr_ptr +1'b1;
+             end
+    
+     end
+             
+             
+   //read
+             
+   always @(posedge clk or negedge rst_n)
+     begin
+       if(!rst_n)
+         rd_ptr <= 0;
+           else if (cs && rd_en && !empty) begin
+             data_out <= fifo[rd_ptr[FIFO_DEPTH_LOG -1: 0]];
+             rd_ptr <= rd_ptr +1'b1;
+                              
+                              end
+                              end
+                              
+  assign empty = (rd_ptr == wr_ptr);
+  assign full = (rd_ptr == {~wr_ptr[FIFO_DEPTH_LOG], wr_ptr[FIFO_DEPTH_LOG-1:0]});
+               
+        
+  
+endmodule
