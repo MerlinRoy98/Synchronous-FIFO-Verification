@@ -1,18 +1,17 @@
 # Synchronous-FIFO-Verification
 
 ## Design
-Parameterized synchronous FIFO (DEPTH=8, DATA_WIDTH=8)
+Parameterized synchronous FIFO (DEPTH=8, DATA_WIDTH=32)
 - Circular buffer with read/write pointers
 - Full/empty flag generation
 
 ## Testbench
 Flat SystemVerilog TB with:
 - Directed write and read phases
-- Queue based scoreboard
-- Randomized data
+- different Test case scenarios tested
 
 ## Results
-- 7/7 comparisons passed
+- All test cases passed successfully
 - Clean waveform captured in waves/
 
 ## Tools
